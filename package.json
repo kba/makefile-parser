@@ -1,6 +1,6 @@
 {
   "name": "@kba/makefile-parser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Generate makefiles",
   "main": "makefile-parser.js",
   "bin": {
