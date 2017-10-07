@@ -1,5 +1,3 @@
-const shellParse = require('shell-quote').parse
-
 class Matcher {
   constructor({name, re, match, handle, terminal}) {
     this.name = name
@@ -52,11 +50,12 @@ const matchers = [
     name: 'target',
     re: /^((?:[^:\t\s]|\:)+)\s*:([^=].*)?$/,
     handle(ctx, line, target, deps) {
-      // deps = shellParse(deps)
-      deps = (deps || '')
-        .match(/([^\\ ]|\\\ ?)+/g)
-        .map(s => s.trim())
-        .filter(s => s)
+      deps = (deps === undefined)
+        ? []
+        : deps.trim()
+          .match(/([^\\ ]|\\\ ?)+/g)
+          .map(s => s.trim())
+          .filter(s => s)
       if (target === '.PHONY') {
         ctx.PHONY.push(...deps)
       } else {
