@@ -1,5 +1,6 @@
 # Spell to use. Default $(SPELL)
 SPELL = xyzzy
+export
 
 # BEGIN-EVAL makefile-parser --make-help Makefile
 

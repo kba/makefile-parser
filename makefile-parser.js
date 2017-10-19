@@ -22,6 +22,15 @@ const matchers = [
     }
   },
   {
+    name: 'export',
+    // re: /^export(?:\s*(?:([^=]+)(?:=(.*))))/,
+    re: /^export(?:\s*(?:([^=]+)(?:=(.*))?)?)?/,
+    handle(ctx, line, variable, value) {
+      const global = variable === undefined && value === undefined
+      ctx.ast.push({export: global ? {global} : {variable, value}})
+    }
+  },
+  {
     name: 'recipe',
     re: /^\t+(.*)/,
     match(ctx, line) {
@@ -82,7 +91,14 @@ const matchers = [
   },
 ].map(def => new Matcher(def))
 
-module.exports = function parseMakefile(str) {
+module.exports = function parseMakefile(str, options={}) {
+  if (!('strict' in options)) options.strict = false
+
+  function handleError(err) {
+    if (options.strict) throw new Error(err)
+    else console.error(err)
+  }
+
   // Join continued lines
   str = str.replace(/\\\n\s*/g, '')
   const lines = str.split(/\n/)
@@ -93,10 +109,10 @@ module.exports = function parseMakefile(str) {
   for (let line of lines) {
     const list = matchers.filter(m => m.match(ctx, line))
     if (list.length === 0) {
-      console.error(`!! UNHANDLED: '${line}'`)
+      handleError(`!! UNHANDLED: '${line}'`)
       continue
     } else if (list.length > 1) {
-      console.error(`!! AMBIGUOUS: (${list.map(x => x.name)}) '${line}'`)
+      handleError(`!! AMBIGUOUS: (${list.map(x => x.name)}) '${line}'`)
       continue
     } else {
       list.map(m => m.handle(ctx, line))
