@@ -7,7 +7,7 @@
     "makefile-parser": "cli.js"
   },
   "scripts": {
-    "test": "tap **/*.test.js",
+    "test": "tap test.js",
     "start": "node main.js"
   },
   "repository": {
