@@ -93,6 +93,7 @@ const matchers = [
 
 module.exports = function parseMakefile(str, options={}) {
   if (!('strict' in options)) options.strict = false
+  if (!('unhandled' in options)) options.unhandled = false
 
   function handleError(err) {
     if (options.strict) throw new Error(err)
@@ -105,11 +106,16 @@ module.exports = function parseMakefile(str, options={}) {
   const ctx = {
     PHONY: [],
     ast: [],
+    unhandled: []
   }
   for (let line of lines) {
     const list = matchers.filter(m => m.match(ctx, line))
     if (list.length === 0) {
-      handleError(`!! UNHANDLED: '${line}'`)
+      if (options.unhandled) {
+        ctx.unhandled.push(`!! UNHANDLED: '${line}'`)
+      } else {
+        handleError(`!! UNHANDLED: '${line}'`)
+      }
       continue
     } else if (list.length > 1) {
       handleError(`!! AMBIGUOUS: (${list.map(x => x.name)}) '${line}'`)

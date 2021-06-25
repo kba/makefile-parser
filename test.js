@@ -1,6 +1,6 @@
 /* eslint no-tabs:0 */
 const tap = require('tap')
-const parse = str => require('.')(str, {strict: true})
+const parse = str => require('.')(str, { strict: true, unhandled: true })
 
 tap.test('target', t => {
   t.deepEquals(parse(`file1: file2\n\trecipe`).ast, [
@@ -26,5 +26,10 @@ tap.test('export', t => {
     t.deepEquals(parse('export foo=42').ast, [{export: {variable: 'foo', value: '42'}}])
     t.end()
   })
+  t.end()
+})
+
+tap.test('UNHANDLED', t => {
+  t.deepEquals(parse('ifeq ($(CURDIR),$(projectPath))').unhandled, ['!! UNHANDLED: \'ifeq ($(CURDIR),$(projectPath))\''])
   t.end()
 })
