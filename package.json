@@ -1,7 +1,7 @@
 {
   "name": "@kba/makefile-parser",
-  "version": "0.0.4",
-  "description": "Generate makefiles",
+  "version": "0.0.5",
+  "description": "Parse makefiles",
   "main": "makefile-parser.js",
   "bin": {
     "makefile-parser": "cli.js"
@@ -12,15 +12,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kba/make.JS"
+    "url": "git+https://github.com/kba/makefile-parser"
   },
   "keywords": [],
   "author": "kba",
   "license": "0.0.1",
   "bugs": {
-    "url": "https://github.com/kba/make.JS/issues"
+    "url": "https://github.com/kba/makefile-parser/issues"
   },
-  "homepage": "https://github.com/kba/make.JS#readme",
+  "homepage": "https://github.com/kba/makefile-parser#readme",
   "dependencies": {
     "yargs": "9.0.1"
   },
