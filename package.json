@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/kba/makefile-parser#readme",
   "dependencies": {
-    "yargs": "9.0.1"
+    "yargs": "^17.0.1"
   },
   "devDependencies": {
     "tap": "10.7.2"
