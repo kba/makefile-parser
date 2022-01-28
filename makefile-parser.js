@@ -65,10 +65,12 @@ const matchers = [
       const include_token = { include: filename };
       let lastToken = ctx.ast[ctx.ast.length - 1]
       if( lastToken && lastToken.comment ) {
-	include_token['comment'] = lastToken.comment;
+        include_token['comment'] = lastToken.comment;
+
+        // Pop the comment token, since it's already added in include_token
+	ctx.ast.pop()
       }
 
-      ctx.ast.pop()
       ctx.ast.push(include_token)
     }
   },
