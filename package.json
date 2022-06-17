@@ -16,7 +16,7 @@
   },
   "keywords": [],
   "author": "kba",
-  "license": "0.0.1",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/kba/makefile-parser/issues"
   },
