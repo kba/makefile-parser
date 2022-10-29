@@ -1,3 +1,6 @@
+const {readFileSync} = require("fs");
+const path = require("path");
+
 class Matcher {
   constructor({name, re, match, handle, terminal}) {
     this.name = name
@@ -56,6 +59,22 @@ const matchers = [
     }
   },
   {
+    name: 'include',
+    re: /^include (.*)/,
+    handle(ctx, line, filename) {
+      const include_token = { include: filename };
+      let lastToken = ctx.ast[ctx.ast.length - 1]
+      if( lastToken && lastToken.comment ) {
+        include_token['comment'] = lastToken.comment;
+
+        // Pop the comment token, since it's already added in include_token
+	ctx.ast.pop()
+      }
+
+      ctx.ast.push(include_token)
+    }
+  },
+  {
     name: 'target',
     re: /^((?:[^:\t\s]|\:)+)\s*:([^=].*)?$/,
     handle(ctx, line, target, deps) {
@@ -94,10 +113,18 @@ const matchers = [
 module.exports = function parseMakefile(str, options={}) {
   if (!('strict' in options)) options.strict = false
   if (!('unhandled' in options)) options.unhandled = false
+  if (!('isfilename' in options)) options.isfilename = false;
 
   function handleError(err) {
     if (options.strict) throw new Error(err)
     else console.error(err)
+  }
+
+  // 'Maybe' a filename, depending on options.isfilename, DONT use this variable elsewhere
+  let filename = str;
+
+  if( options.isfilename ) {
+    str = readFileSync(filename).toString();
   }
 
   // Join continued lines
@@ -108,6 +135,7 @@ module.exports = function parseMakefile(str, options={}) {
     ast: [],
     unhandled: []
   }
+
   for (let line of lines) {
     const list = matchers.filter(m => m.match(ctx, line))
     if (list.length === 0) {
@@ -121,7 +149,26 @@ module.exports = function parseMakefile(str, options={}) {
       handleError(`!! AMBIGUOUS: (${list.map(x => x.name)}) '${line}'`)
       continue
     } else {
+      // Ensured in this branch, list contains only one element, so list[0] is fine
       list.map(m => m.handle(ctx, line))
+
+      if (list[0].name === 'include') {
+	if( options.isfilename === false ) {
+	  handleError("Ignoring 'include' statements. For it to work, filename is required instead of content string.\nTo use it, use like this: parseMakefile(\"/path/to/makefile\", {isfilename: true})");
+	} else {
+	  const relative_path = ctx.ast[ctx.ast.length - 1].include;
+	  const parent_dir = path.dirname(filename);
+	  const absolute_path = path.join(parent_dir, relative_path);
+
+	  // recursively call parseMakefile on the included file
+	  const included_ctx = parseMakefile(absolute_path, {...options, isfilename: true});
+
+	  // `included_ctx` contains context for the included file, merge it with our context
+	  ctx.PHONY = ctx.PHONY.concat( included_ctx.PHONY );
+	  ctx.ast = ctx.ast.concat( included_ctx.ast );
+	  ctx.unhandled = ctx.unhandled.concat( included_ctx.unhandled );
+	}
+      }
     }
   }
   return ctx
